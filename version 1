@@ -1,0 +1,97 @@
+  double sensorVal = 0; //for linear regression calibration sequence
+  double ticker = 0; //for linear regression calibration sequence
+  double sensTot = 0; //for linear regression calibration sequence
+  double startTime = 0; //for linear regression calibration sequence
+  int pressure = 0; //for final print statement
+  double x[4] = {0.0, 0.0, 0.0, 0.0}; //for linear regression calibration sequence
+  double y[4] = {0.0, 100.0, 200.0, 300.0}; //for linear regression calibration sequence
+  double lrCoef[2]={0.0,0.0}; //linear regression constants
+
+  void simpLinReg(double* x, double* y, double* lrCoef, int n)
+  {
+  // pass x and y arrays (pointers), lrCoef pointer, and n. The lrCoef array is comprised of the slope=lrCoef[0] and intercept=lrCoef[1]. n is length of the x and y arrays.
+  
+  // calculations required for linear regression
+  double xAve=(x[0]+x[1]+x[2]+x[3])/4.0;
+  for (int i=0; i<n; i++)
+  {
+  double xDist = x[i]-xAve;
+  double yDist = y[i]-150;
+  double xyDist = xDist*yDist;
+  double xyDistSum = xyDistSum+xyDist;
+  double xDistSq = xDist*xDist;
+  double xDistSqSum = xDistSqSum+xDistSq;
+  }
+  
+  // simple linear regression algorithm
+  lrCoef[0]=xyDistSum/xDistSqSum;
+  lrCoef[1]=150-lrCoef[0]*xAve;
+  }
+  
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Calibration at 0 mmH20 will begin in 5 seconds.");
+  delay(5000);
+  startTime = millis();
+  while(millis()-startTime<10000){
+    double sensorVal = analogRead(A1); //CHANGE ANALOG PIN HERE
+    sensTot = sensTot+sensorVal;
+    ticker=ticker+1;
+  }
+  x[0]=sensTot/ticker;
+  Serial.println(x[0]);
+  Serial.println("First calibration complete. Calibration at 100 mmH20 will begin in 5 seconds.");
+  sensTot=0;
+  ticker=0;
+  delay(5000);
+  startTime = millis();
+  while(millis()-startTime<10000){
+    double sensorVal = analogRead(A1); //CHANGE ANALOG PIN HERE
+    sensTot = sensTot+sensorVal;
+    ticker=ticker+1;
+  }
+  x[1]=sensTot/ticker;
+  Serial.println(x[1]);
+  Serial.println("Second calibration complete. Calibration at 200 mmH20 will begin in 5 seconds.");
+  sensTot=0;
+  ticker=0;
+  delay(5000);
+  startTime = millis();
+  while(millis()-startTime<10000){
+    double sensorVal = analogRead(A1); //CHANGE ANALOG PIN HERE
+    sensTot = sensTot+sensorVal;
+    ticker=ticker+1;
+  }
+  x[2]=sensTot/ticker;
+  Serial.println(x[2]);
+  Serial.println("Third calibration complete. Calibration at 300 mmH20 will begin in 5 seconds.");
+  sensTot=0;
+  ticker=0;
+  delay(5000);
+  startTime = millis();
+  while(millis()-startTime<10000){
+    double sensorVal = analogRead(A1); //CHANGE ANALOG PIN HERE
+    sensTot = sensTot+sensorVal;
+    ticker=ticker+1;
+  }
+  x[3]=sensTot/ticker;
+  Serial.println(x[3]);
+  simpLinReg(x, y, lrCoef, 4);
+  Serial.println("Final calibration complete.");
+  Serial.println(lrCoef[0]);
+  Serial.println(lrCoef[1]);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  pressure= lrCoef[0]*analogRead(A1)+lrCoef[1]; //CHANGE ANALOG PIN HERE
+  Serial.println(pressure);
+  delay(100);
+}
+
+[master (root-commit) 4a6e7c1] Adding initial source code.
+ 1 file changed, 1 insertion(+)
+ create mode 100644 index.html
+ 
+ On branch master
+nothing to commit, working directory clean
